@@ -29,7 +29,7 @@ indicadores_dic = {
     "indicador_3":  { "prefix_meta": " ", "sufix_meta": "%", "invert_color_scale": False },
     "indicador_5":  { "prefix_meta": "  ", "sufix_meta": "%", "invert_color_scale": False },
     "indicador_6": { "prefix_meta": "  ", "sufix_meta": "%", "invert_color_scale": False }, 
-    "indicador_8":{ "prefix_meta": "Redução de ", "sufix_meta": "%", "invert_color_scale": True },
+    # "indicador_8":{ "prefix_meta": "Redução de ", "sufix_meta": "%", "invert_color_scale": True },
     "indicador_9":{ "prefix_meta": "  ", "sufix_meta": "%", "invert_color_scale": True },
     "Indicador_13": { "prefix_meta": "  ", "sufix_meta": "%", "invert_color_scale": False },
     "Indicador_14": { "prefix_meta": "  ", "sufix_meta": "%", "invert_color_scale": True },
