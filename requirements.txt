@@ -7,3 +7,4 @@ geopandas
 argparse
 django
 djangorestframework
+django-cors-headers
