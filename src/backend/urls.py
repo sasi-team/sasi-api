@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api.views import GenerateMapView, IndicatorsListView
+from api.views import GenerateMapView, IndicadorListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/generate_map/', GenerateMapView.as_view(), name='generate_map'),
-    path('api/indicators/', IndicatorsListView.as_view(), name='indicators_list'),
+    path('api/indicadores/', IndicadorListView.as_view(), name='indicadores_list'),
 ]

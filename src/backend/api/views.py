@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
+from django.db import models
+from .models import Indicador, Cidade, MacroRegiao, RegiaoSaude, ValorIndicador
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import re
 
-# Create your views here.
 
 indicadores_dic = {
     "indicador_3": { "prefix_meta": " ", "sufix_meta": "%", "invert_color_scale": False },
@@ -40,42 +41,39 @@ def extract_meta_value(meta_text):
 
 class GenerateMapView(View):
     def get(self, request, *args, **kwargs):
-        indicador = request.GET.get('indicador')
+        id_indicador = request.GET.get('id_indicador')
         ano = request.GET.get('ano')
-        if not indicador or not ano:
+        if not id_indicador or not ano:
             return JsonResponse({'error': 'Indicador and ano are required parameters'}, status=400)
         
-        if indicador not in indicadores_dic:
-            return JsonResponse({'error': f'Indicador {indicador} not found'}, status=404)
-        
         try:
+            indicador_obj = Indicador.objects.get(id=id_indicador)
+            valores_indicador = ValorIndicador.objects.filter(indicador=indicador_obj, ano=ano)
+            if not valores_indicador.exists():
+                return JsonResponse({'error': f'No data found for indicador {id_indicador} and ano {ano}'}, status=404)
+            
             geojson_path = "../../assets/data/geojs-29-mun.json"
-            indicador_csv_path = f"../../assets/indicadores/{indicador}.csv"
-            titulo_subtitulo_csv_path = "../../assets/data/titulo_subtitulo.csv"
-            params = indicadores_dic[indicador]
+            params = indicadores_dic[indicador_obj.nome_arquivo]
             
             # Carregar dados
             with open(geojson_path, 'r', encoding='utf-8') as file:
                 geojson_data = json.load(file)
             
-            df_indicador = pd.read_csv(indicador_csv_path)
-            df_indicador['Cod. IBGE'] = df_indicador['Cod. IBGE'].astype(str)
-            df_titulo_subtitulo = pd.read_csv(titulo_subtitulo_csv_path).fillna("")
-            
-            # Extrair informações
-            titulo = df_titulo_subtitulo[df_titulo_subtitulo['nome_arquivo'] == indicador]['titulo'].values[0]
-            fonte = df_titulo_subtitulo[df_titulo_subtitulo['nome_arquivo'] == indicador]['fonte'].values[0]
-            meta_estadual = df_titulo_subtitulo[df_titulo_subtitulo['nome_arquivo'] == indicador]['subtitulo'].values[0]
+            titulo = indicador_obj.titulo
+            fonte = indicador_obj.fonte
+            meta_estadual = indicador_obj.subtitulo
             meta_estadual_valor = extract_meta_value(meta_estadual)
             
             # Obter valores min/max
-            min_val, max_val = get_max_min_values(df_indicador, ano)
+            min_val = valores_indicador.aggregate(models.Min('valor'))['valor__min']
+            max_val = valores_indicador.aggregate(models.Max('valor'))['valor__max']
             
             # Adicionar informações aos polígonos
             for feature in geojson_data['features']:
                 codigo_ibge = feature['properties']['id']
                 municipio = feature['properties']['name']
-                valor = get_indicator_value(df_indicador, codigo_ibge, ano)
+                valor = valores_indicador.filter(cidade__codigo_ibge=codigo_ibge).first()
+                valor = valor.valor if valor else 0
                 fill_color = color_gradient_picker(valor, min_val, max_val, params["invert_color_scale"])
                 feature['properties'].update({
                     'valor': valor,
@@ -88,16 +86,16 @@ class GenerateMapView(View):
                 })
             
             return JsonResponse(geojson_data)
+        except Indicador.DoesNotExist:
+            return JsonResponse({'error': f'Indicador {id_indicador} not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-class IndicatorsListView(View):
+class IndicadorListView(View):
     def get(self, request, *args, **kwargs):
         try:
-            titulo_subtitulo_csv_path = "../../assets/data/titulo_subtitulo.csv"
-            df_titulo_subtitulo = pd.read_csv(titulo_subtitulo_csv_path).fillna("")
-            indicators = df_titulo_subtitulo[['nome_arquivo', 'titulo']].to_dict(orient='records')
-            return JsonResponse(indicators, safe=False)
+            indicador = Indicador.objects.values()
+            return JsonResponse(list(indicador), safe=False)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
@@ -107,7 +105,7 @@ def get_max_min_values(df, year):
     max_val = df[year].max()
     return min_val, max_val
 
-def get_indicator_value(df, codigo_ibge, ano):
+def get_indicador_value(df, codigo_ibge, ano):
     if len(str(codigo_ibge)) > 6:
         codigo_ibge = str(codigo_ibge)[:-1]
     try:

@@ -46,7 +46,7 @@ def import_cities_and_regions():
             regiao_saude=regiao_saude
         )
 
-def import_indicators():
+def import_indicadores():
     df = pd.read_csv('../../assets/data/titulo_subtitulo.csv')
     
     for _, row in df.iterrows():
@@ -94,7 +94,7 @@ class Command(BaseCommand):
                     
         self.stdout.write('importando indicadores...')
         try:
-            import_indicators()
+            import_indicadores()
         except Exception as e:
             self.stdout.write(f'Erro ao importando indicadores: {str(e)}')        
         pd_indicadores = pd.read_csv('../../assets/data/titulo_subtitulo.csv')
