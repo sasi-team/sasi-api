@@ -263,6 +263,7 @@ class EstabelecimentosView(APIView):
             "estabelecimento_possui_servico_apoio",
             "estabelecimento_possui_atendimento_ambulatorial",
             "codigo_municipio",
+            "codigo_tipo_unidade",  
         ]
         filters = {
             param: request.GET.get(param)
