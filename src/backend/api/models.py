@@ -56,3 +56,23 @@ class ValorIndicador(models.Model):
 
     def __str__(self):
         return f"{self.cidade} - {self.indicador} ({self.ano}): {self.valor}"
+
+class TipoUnidade(models.Model):
+    codigo_tipo_unidade = models.IntegerField(primary_key=True)
+    descricao_tipo_unidade = models.CharField(max_length=255)
+
+class Estabelecimento(models.Model):
+    codigo_cnes = models.IntegerField(primary_key=True)
+    nome_fantasia = models.CharField(max_length=255)
+    endereco_estabelecimento = models.CharField(max_length=255)
+    numero_estabelecimento = models.CharField(max_length=10)
+    bairro_estabelecimento = models.CharField(max_length=255)
+    codigo_cep_estabelecimento = models.CharField(max_length=10)
+    latitude_estabelecimento_decimo_grau = models.FloatField()
+    longitude_estabelecimento_decimo_grau = models.FloatField()
+    numero_telefone_estabelecimento = models.CharField(max_length=20, null=True)
+    descricao_turno_atendimento = models.CharField(max_length=255)
+    estabelecimento_faz_atendimento_ambulatorial_sus = models.CharField(max_length=3)
+    estabelecimento_possui_centro_cirurgico = models.IntegerField()
+    estabelecimento_possui_servico_apoio = models.IntegerField()
+    estabelecimento_possui_atendimento_ambulatorial = models.IntegerField()

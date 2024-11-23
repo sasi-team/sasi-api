@@ -2,12 +2,14 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
 from django.db import models
-from .models import Indicador, Cidade, MacroRegiao, RegiaoSaude, ValorIndicador
+from .models import Indicador, Cidade, MacroRegiao, RegiaoSaude, ValorIndicador, Estabelecimento
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import re
+import requests
+from rest_framework.views import APIView
 
 
 indicadores_dic = {
@@ -132,3 +134,31 @@ def color_gradient_picker(valor, min_val=0, max_val=100, invert=False):
     rgba_color = cmap(norm(valor))
     hex_color = mcolors.rgb2hex(rgba_color)
     return hex_color
+
+class EstabelecimentosSaudeProxy(APIView):
+    def get(self, request):
+        base_url = 'https://apidadosabertos.saude.gov.br/cnes/estabelecimentos'
+        params = request.query_params
+        response = requests.get(base_url, params=params)
+        return JsonResponse(response.json(), safe=False)
+
+class EstabelecimentosView(APIView):
+    def get(self, request):
+        filters = {}
+        for param in ['codigo_cnes', 'nome_fantasia', 'endereco_estabelecimento', 'numero_estabelecimento',
+                      'bairro_estabelecimento', 'codigo_cep_estabelecimento', 'latitude_estabelecimento_decimo_grau',
+                      'longitude_estabelecimento_decimo_grau', 'numero_telefone_estabelecimento', 'descricao_turno_atendimento',
+                      'estabelecimento_faz_atendimento_ambulatorial_sus', 'estabelecimento_possui_centro_cirurgico',
+                      'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial']:
+            value = request.GET.get(param)
+            if value:
+                filters[param] = value
+
+        estabelecimentos = Estabelecimento.objects.filter(**filters).values(
+            'codigo_cnes', 'nome_fantasia', 'endereco_estabelecimento', 'numero_estabelecimento',
+            'bairro_estabelecimento', 'codigo_cep_estabelecimento', 'latitude_estabelecimento_decimo_grau',
+            'longitude_estabelecimento_decimo_grau', 'numero_telefone_estabelecimento', 'descricao_turno_atendimento',
+            'estabelecimento_faz_atendimento_ambulatorial_sus', 'estabelecimento_possui_centro_cirurgico',
+            'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial'
+        )
+        return JsonResponse({'estabelecimentos': list(estabelecimentos)}, safe=False)
