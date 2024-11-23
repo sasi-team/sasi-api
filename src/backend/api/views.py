@@ -144,21 +144,32 @@ class EstabelecimentosSaudeProxy(APIView):
 
 class EstabelecimentosView(APIView):
     def get(self, request):
-        filters = {}
-        for param in ['codigo_cnes', 'nome_fantasia', 'endereco_estabelecimento', 'numero_estabelecimento',
-                      'bairro_estabelecimento', 'codigo_cep_estabelecimento', 'latitude_estabelecimento_decimo_grau',
-                      'longitude_estabelecimento_decimo_grau', 'numero_telefone_estabelecimento', 'descricao_turno_atendimento',
-                      'estabelecimento_faz_atendimento_ambulatorial_sus', 'estabelecimento_possui_centro_cirurgico',
-                      'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial']:
-            value = request.GET.get(param)
-            if value:
-                filters[param] = value
-
+        filters = self.build_filters(request)
         estabelecimentos = Estabelecimento.objects.filter(**filters).values(
             'codigo_cnes', 'nome_fantasia', 'endereco_estabelecimento', 'numero_estabelecimento',
             'bairro_estabelecimento', 'codigo_cep_estabelecimento', 'latitude_estabelecimento_decimo_grau',
             'longitude_estabelecimento_decimo_grau', 'numero_telefone_estabelecimento', 'descricao_turno_atendimento',
             'estabelecimento_faz_atendimento_ambulatorial_sus', 'estabelecimento_possui_centro_cirurgico',
-            'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial'
+            'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial', 'codigo_municipio',
+            'numero_cnpj_entidade', 'nome_razao_social', 'natureza_organizacao_entidade', 'tipo_gestao',
+            'descricao_nivel_hierarquia', 'descricao_esfera_administrativa', 'codigo_tipo_unidade',
+            'endereco_email_estabelecimento', 'numero_cnpj', 'codigo_identificador_turno_atendimento',
+            'codigo_estabelecimento_saude', 'codigo_uf', 'descricao_natureza_juridica_estabelecimento',
+            'codigo_motivo_desabilitacao_estabelecimento', 'estabelecimento_possui_centro_obstetrico',
+            'estabelecimento_possui_centro_neonatal', 'estabelecimento_possui_atendimento_hospitalar',
+            'codigo_atividade_ensino_unidade', 'codigo_natureza_organizacao_unidade', 'codigo_nivel_hierarquia_unidade',
+            'codigo_esfera_administrativa_unidade'
         )
         return JsonResponse({'estabelecimentos': list(estabelecimentos)}, safe=False)
+
+    def build_filters(self, request):
+        """Constrói filtros de consulta a partir dos parâmetros da requisição"""
+        filter_params = [
+            'codigo_cnes', 'nome_fantasia', 'endereco_estabelecimento', 'numero_estabelecimento',
+            'bairro_estabelecimento', 'codigo_cep_estabelecimento', 'latitude_estabelecimento_decimo_grau',
+            'longitude_estabelecimento_decimo_grau', 'numero_telefone_estabelecimento', 'descricao_turno_atendimento',
+            'estabelecimento_faz_atendimento_ambulatorial_sus', 'estabelecimento_possui_centro_cirurgico',
+            'estabelecimento_possui_servico_apoio', 'estabelecimento_possui_atendimento_ambulatorial', 'codigo_municipio'
+        ]
+        filters = {param: request.GET.get(param) for param in filter_params if request.GET.get(param)}
+        return filters
