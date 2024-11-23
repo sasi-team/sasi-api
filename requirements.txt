@@ -8,3 +8,5 @@ argparse
 django
 djangorestframework
 django-cors-headers
+tqdm
+backoff
