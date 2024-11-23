@@ -33,6 +33,9 @@ def extract_source(text):
 
     return None
 
+def is_valid_indicador_name(name):
+    return re.match(r'^nome_\d+$', name) is not None
+
 # Função para processar o arquivo Excel e extrair título, subtítulo e fonte
 def process_excel_file(xlsx_file):
     sheet_names = pd.read_excel(xlsx_file, sheet_name=None, header=None)
@@ -40,6 +43,8 @@ def process_excel_file(xlsx_file):
 
     for sheet_name, df in sheet_names.items():
         safe_sheet_name = sheet_name.replace(" ", "_").replace("/", "_")
+        if not is_valid_indicador_name(safe_sheet_name):
+            continue
         titulo = clean_cell_content(df.iloc[0, 0])
         subtitulo = clean_cell_content(df.iloc[1, 0])
 
@@ -68,6 +73,8 @@ def save_sheets_to_csv(xlsx_file):
     sheets = pd.read_excel(xlsx_file, sheet_name=None, header=2)  # Define a linha 3 como cabeçalho
     for sheet_name, df in sheets.items():
         safe_sheet_name = sheet_name.replace(" ", "_").replace("/", "_")
+        if not is_valid_indicador_name(safe_sheet_name):
+            continue
         
         # Verificar se as colunas críticas estão presentes
         critical_columns = ['Macrorregião de Saúde', 'Região de Saúde', 'Cod. IBGE', 'Município']

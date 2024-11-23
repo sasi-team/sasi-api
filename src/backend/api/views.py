@@ -48,11 +48,13 @@ class GenerateMapView(View):
         
         try:
             indicador_obj = Indicador.objects.get(id=id_indicador)
+            if not indicadores_dic.get(indicador_obj.nome_arquivo):
+                return JsonResponse({'error': f'Dados do indicador indisponíveis'}, status=404)
             valores_indicador = ValorIndicador.objects.filter(indicador=indicador_obj, ano=ano)
             if not valores_indicador.exists():
                 return JsonResponse({'error': f'No data found for indicador {id_indicador} and ano {ano}'}, status=404)
             
-            geojson_path = "../../assets/data/geojs-29-mun.json"
+            geojson_path = "./assets/data/geojs-29-mun.json"
             params = indicadores_dic[indicador_obj.nome_arquivo]
             
             # Carregar dados
