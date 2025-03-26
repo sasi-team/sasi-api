@@ -24,6 +24,7 @@ from api.views import (
     EstabelecimentosView,
     TipoUnidadeListView,
     CidadeListView,
+    EstoqueView,
 )
 
 urlpatterns = [
@@ -35,4 +36,5 @@ urlpatterns = [
     ),
     path("api/tipos_unidade/", TipoUnidadeListView.as_view(), name="tipos_unidade"),
     path("api/cidades/", CidadeListView.as_view(), name="cidades"),
+    path("api/estoque/", EstoqueView.as_view(), name="estoque"),
 ]

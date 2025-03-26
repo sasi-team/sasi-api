@@ -10,6 +10,7 @@ from .models import (
     ValorIndicador,
     Estabelecimento,
     TipoUnidade,
+    Estoque,
 )
 import pandas as pd
 import json
@@ -297,3 +298,61 @@ class CidadeListView(APIView):
             for cidade in cidades
         ]
         return JsonResponse({'cidades': cidades}, safe=False)
+
+
+class EstoqueView(APIView):
+    def get(self, request):
+        filters = self.build_filters(request)
+        estoque = Estoque.objects.filter(**filters).values(
+            "codigo_uf",
+            "uf",
+            "codigo_municipio",
+            "municipio",
+            "codigo_cnes",
+            "data_posicao_estoque",
+            "codigo_catmat",
+            "descricao_produto",
+            "quantidade_estoque",
+            "numero_lote",
+            "data_validade",
+            "tipo_produto",
+            "sigla_programa_saude",
+            "descricao_programa_saude",
+            "sigla_sistema_origem",
+            "razao_social",
+            "nome_fantasia",
+            "cep",
+            "logradouro",
+            "numero_endereco",
+            "bairro",
+            "telefone",
+            "latitude",
+            "longitude",
+            "email"
+        )
+        return JsonResponse({"estoque": list(estoque)}, safe=False)
+    
+    
+    def build_filters(self, request):
+        """Constrói filtros de consulta a partir dos parâmetros da requisição"""
+        filter_params = [
+            "codigo_uf",
+            "codigo_municipio",
+            "codigo_cnes",
+            "data_posicao_estoque",
+            "codigo_catmat",
+            "sigla_programa_saude",
+            "tipo_produto",
+            "sigla_sistema_origem",
+            "codigo_cnes",
+            "municipio",
+            "numero_lote",
+            "limit",
+            "offset",
+        ]
+        filters = {
+            param: request.GET.get(param)
+            for param in filter_params
+            if request.GET.get(param)
+        }
+        return filters
