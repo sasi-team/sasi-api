@@ -4,8 +4,8 @@ SASI
 ### Configuração do Ambiente
 1. Clone o repositório:
     ```bash
-    git clone https://github.com/sasi-team/sasi.git
-    cd sasi
+    git clone https://github.com/restic36/sasi-back.git
+    cd sasi-back
     ```
 2. Crie e ative um ambiente virtual:
     ```bash
